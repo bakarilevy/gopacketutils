@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 	"strings"
@@ -8,24 +9,29 @@ import (
 	"github.com/google/gopacket/pcap"
 )
 
-//ALL_DEVICES := pcap.FindAllDevs()
+var ALL_DEVICES = FindAllDevices()
 
-func ListDevices() {
+// Users shouldn't need to use this function, simply used to populate devices on startup to avoid multiple loops over pcap.FindAllDevs
+func FindAllDevices() ([]pcap.Interface) {
 	devices, err := pcap.FindAllDevs()
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("Error while trying to find all devices")
+		panic(err)
 	}
+	return devices
+}
 
-	// Print device information
-	log.Println("Devices found:\n")
-	for _, device := range devices {
-		log.Println("Name: ", device.Name)
-		log.Println("Description: ", device.Description)
-		log.Println()
+func ListDevices() {
+
+	fmt.Println("Devices found:\n")
+	for _, device := range ALL_DEVICES {
+		fmt.Println("Name: ", device.Name)
+		fmt.Println("Description: ", device.Description)
+		fmt.Println()
 		for _, address := range device.Addresses {
-			log.Println("- IP Address: ", address.IP)
-			log.Println("- Subnet Mask: ", address.Netmask)
-			log.Println()
+			fmt.Println("- IP Address: ", address.IP)
+			fmt.Println("- Subnet Mask: ", address.Netmask)
+			fmt.Println()
 		}
 	}
 }
@@ -65,13 +71,9 @@ func SetFilterEx(filter string, handle *pcap.Handle) {
 }
 
 func SetDefaultWiFiDevice() (*pcap.Handle) {
-	devices, err := pcap.FindAllDevs()
-	if err != nil {
-		log.Fatalln(err)
-	}
 
 	var default_device_name string
-	for _, device := range devices {
+	for _, device := range ALL_DEVICES {
 		if (strings.Contains(device.Description, "Wi-Fi") || strings.Contains(device.Description, "WiFi"))  && (!strings.Contains(device.Description, "Virtual")) {
 			default_device_name = device.Name
 		}
@@ -83,12 +85,8 @@ func SetDefaultWiFiDevice() (*pcap.Handle) {
 }
 
 func GetDefaultWiFiDeviceInfo() {
-	devices, err := pcap.FindAllDevs()
-	if err != nil {
-		log.Fatalln(err)
-	}
 	
-	for _, device := range devices {
+	for _, device := range ALL_DEVICES {
 		if (strings.Contains(device.Description, "Wi-Fi") || strings.Contains(device.Description, "WiFi"))  && (!strings.Contains(device.Description, "Virtual")) {
 			log.Println("Name: ", device.Name)
 			log.Println("Description: ", device.Description)
