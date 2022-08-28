@@ -1,4 +1,4 @@
-module netty
+module gopacketutils
 
 go 1.19
 

@@ -1,15 +1,19 @@
-package main
+package primitives
 
 import (
 	"fmt"
 	"log"
 	"time"
 	"strings"
-//	"github.com/google/gopacket"
+	"github.com/google/gopacket"
 	"github.com/google/gopacket/pcap"
 )
 
 var ALL_DEVICES = FindAllDevices()
+
+var FILTERS = map[string]string{
+	"HTTP": "tcp and port 80",
+}
 
 // Users shouldn't need to use this function, simply used to populate devices on startup to avoid multiple loops over pcap.FindAllDevs
 func FindAllDevices() ([]pcap.Interface) {
@@ -41,13 +45,24 @@ func SetTimeout(minutes int) (time.Duration) {
 	return timeout
 }
 
-// Setting default timeout to 3 minutes for tesitng.
-func SetDevice(device string) (*pcap.Handle){
+//Alias SetDeviceA
+func SetDevice(device string) (*pcap.Handle) {
+	handle := SetDeviceA(device)
+	return handle
+}
+
+// Setting default timeout to 5 minutes for tesitng.
+func SetDeviceA(device string) (*pcap.Handle) {
+	handle := SetDeviceB(device, 5)
+	return handle
+}
+
+func SetDeviceB(device string, minute_timeout int) (*pcap.Handle) {
 	var (
 		snapshot_len int32 = 1024
 		promiscuous bool = true
 	)
-	timeout := SetTimeout(3)
+	timeout := SetTimeout(minute_timeout)
 	handle, err := SetDeviceEx(device, snapshot_len, promiscuous, timeout)
 	if err != nil {
 		log.Fatalln("Error while getting handle to network device")
@@ -66,8 +81,16 @@ func SetDeviceEx(device string, snapshot_len int32, promiscuous bool, timeout ti
 	return handle, nil
 }
 
-func SetFilterEx(filter string, handle *pcap.Handle) {
-	// Set the filter on as specific network interface
+func SetFilter(filter string, handle *pcap.Handle) {
+	// Set the filter on a specific network interface
+	err := handle.SetBPFFilter(filter)
+	if err != nil {
+		log.Fatalln("Error while attempting to set filter on interface")
+		log.Fatalln(err)
+	} else {
+		log.Println("Successfully applied filter: " + filter + " to interface")
+	}
+
 }
 
 func SetDefaultWiFiDevice() (*pcap.Handle) {
@@ -101,8 +124,9 @@ func GetDefaultWiFiDeviceInfo() {
 	}
 }
 
-
-func main() {
-	GetDefaultWiFiDeviceInfo()
-	//_ = SetDefaultWiFiDevice()
+func ShowPacket(handle *pcap.Handle) {
+	packet_source := gopacket.NewPacketSource(handle, handle.LinkType())
+	for packet := range packet_source.Packets() {
+		fmt.Println(packet)
+	}
 }
