@@ -12,7 +12,9 @@ import (
 var ALL_DEVICES = FindAllDevices()
 
 var FILTERS = map[string]string{
+	"FTP":"tcp and port 21",
 	"HTTP": "tcp and port 80",
+	"DNS":"dns",
 }
 
 // Users shouldn't need to use this function, simply used to populate devices on startup to avoid multiple loops over pcap.FindAllDevs
@@ -45,15 +47,9 @@ func SetTimeout(minutes int) (time.Duration) {
 	return timeout
 }
 
-//Alias SetDeviceA
-func SetDevice(device string) (*pcap.Handle) {
-	handle := SetDeviceA(device)
-	return handle
-}
-
-// Setting default timeout to 5 minutes for tesitng.
+// Setting default timeout to 1 minutes for testing.
 func SetDeviceA(device string) (*pcap.Handle) {
-	handle := SetDeviceB(device, 5)
+	handle := SetDeviceB(device, 1)
 	return handle
 }
 
@@ -97,36 +93,36 @@ func SetDefaultWiFiDevice() (*pcap.Handle) {
 
 	var default_device_name string
 	for _, device := range ALL_DEVICES {
-		if (strings.Contains(device.Description, "Wi-Fi") || strings.Contains(device.Description, "WiFi"))  && (!strings.Contains(device.Description, "Virtual")) {
+		if (strings.Contains(device.Description, "Wi-Fi") || strings.Contains(device.Description, "WiFi"))  && (!strings.Contains(device.Description, "Virtual") || !strings.Contains(device.Description, "virtual")) {
 			default_device_name = device.Name
 		}
 	}
 
 	log.Println("Setting default device to: " + default_device_name)
-	default_device := SetDevice(default_device_name)
+	default_device := SetDeviceA(default_device_name)
 	return default_device
 }
 
 func GetDefaultWiFiDeviceInfo() {
 	
 	for _, device := range ALL_DEVICES {
-		if (strings.Contains(device.Description, "Wi-Fi") || strings.Contains(device.Description, "WiFi"))  && (!strings.Contains(device.Description, "Virtual")) {
-			log.Println("Name: ", device.Name)
-			log.Println("Description: ", device.Description)
-			log.Println()
+		if (strings.Contains(device.Description, "Wi-Fi") || strings.Contains(device.Description, "WiFi"))  && (!strings.Contains(device.Description, "Virtual") || !strings.Contains(device.Description, "virtual")) {
+			fmt.Println("Name: ", device.Name)
+			fmt.Println("Description: ", device.Description)
+			fmt.Println()
 		
 			for _, address := range device.Addresses {
-				log.Println("- IP Address: ", address.IP)
-				log.Println("- Subnet Mask: ", address.Netmask)
-				log.Println()
+				fmt.Println("- IP Address: ", address.IP)
+				fmt.Println("- Subnet Mask: ", address.Netmask)
+				fmt.Println()
 			}
 		}
 	}
 }
 
-func ShowPacket(handle *pcap.Handle) {
+func ReadPackets(handle *pcap.Handle) {
 	packet_source := gopacket.NewPacketSource(handle, handle.LinkType())
 	for packet := range packet_source.Packets() {
-		fmt.Println(packet)
+		fmt.Println(packet.String())
 	}
 }

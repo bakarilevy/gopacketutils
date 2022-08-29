@@ -18,3 +18,4 @@ The Primitives API is intended to provide a slightly lower level abstraction of 
 - Add packet relay functionality
 - Implement a hard limit on packets read into memory unless written to file.
 - Implement true concurrency, currently running ReadHttpTraffic in goroutine leads to program main event loop closing immediately
+- GetDeviceInfo functions should not print the strings but should rather return formatted string
