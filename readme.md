@@ -13,6 +13,7 @@ The Primitives API is intended to provide a slightly lower level abstraction of 
 ## TODOS
 
 - Add test suite
+- When reading from pcap file and setting dns filter on interface there is no issue but program crashes without error message when reading from interface
 - Improved logging on functions that use pcap.Handle to see associated interface
 - Add packet relay functionality
 - Implement a hard limit on packets read into memory unless written to file.

@@ -13,6 +13,7 @@ func SetDevice(device string) (*pcap.Handle) {
 
 func ReadFtpTraffic(handle *pcap.Handle) {
 	primitives.SetFilter(primitives.FILTERS["FTP"], handle)
+	primitives.ReadPackets(handle)
 	defer handle.Close()
 }
 
