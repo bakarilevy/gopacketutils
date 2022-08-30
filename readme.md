@@ -13,7 +13,6 @@ The Primitives API is intended to provide a slightly lower level abstraction of 
 ## TODOS
 
 - Add test suite
-- Ensure all handles to devices are closed (Perhaps already achieved with the timeout variable in pcap.OpenLive function?)
 - Improved logging on functions that use pcap.Handle to see associated interface
 - Add packet relay functionality
 - Implement a hard limit on packets read into memory unless written to file.

@@ -42,23 +42,23 @@ func ListDevices() {
 	}
 }
 
-func SetTimeout(minutes int) (time.Duration) {
-	timeout := time.Duration(minutes) * time.Minute
+func SetTimeout(seconds int) (time.Duration) {
+	timeout := time.Duration(seconds) * time.Second
 	return timeout
 }
 
-// Setting default timeout to 1 minutes for testing.
+// Setting default timeout to -1 seconds to immedeately flush packets.
 func SetDeviceA(device string) (*pcap.Handle) {
-	handle := SetDeviceB(device, 1)
+	handle := SetDeviceB(device, -1)
 	return handle
 }
 
-func SetDeviceB(device string, minute_timeout int) (*pcap.Handle) {
+func SetDeviceB(device string, seconds_timeout int) (*pcap.Handle) {
 	var (
-		snapshot_len int32 = 1024
+		snapshot_len int32 = 65535
 		promiscuous bool = true
 	)
-	timeout := SetTimeout(minute_timeout)
+	timeout := SetTimeout(seconds_timeout)
 	handle, err := SetDeviceEx(device, snapshot_len, promiscuous, timeout)
 	if err != nil {
 		log.Fatalln("Error while getting handle to network device")
@@ -93,7 +93,7 @@ func SetDefaultWiFiDevice() (*pcap.Handle) {
 
 	var default_device_name string
 	for _, device := range ALL_DEVICES {
-		if (strings.Contains(device.Description, "Wi-Fi") || strings.Contains(device.Description, "WiFi"))  && (!strings.Contains(device.Description, "Virtual") || !strings.Contains(device.Description, "virtual")) {
+		if (strings.Contains(device.Description, "Wi-Fi") || strings.Contains(device.Description, "WiFi"))  && (!strings.Contains(device.Description, "Virtual") && !strings.Contains(device.Description, "virtual")) {
 			default_device_name = device.Name
 		}
 	}
@@ -106,7 +106,7 @@ func SetDefaultWiFiDevice() (*pcap.Handle) {
 func GetDefaultWiFiDeviceInfo() {
 	
 	for _, device := range ALL_DEVICES {
-		if (strings.Contains(device.Description, "Wi-Fi") || strings.Contains(device.Description, "WiFi"))  && (!strings.Contains(device.Description, "Virtual") || !strings.Contains(device.Description, "virtual")) {
+		if (strings.Contains(device.Description, "Wi-Fi") || strings.Contains(device.Description, "WiFi"))  && (!strings.Contains(device.Description, "Virtual") && !strings.Contains(device.Description, "virtual")) {
 			fmt.Println("Name: ", device.Name)
 			fmt.Println("Description: ", device.Description)
 			fmt.Println()
